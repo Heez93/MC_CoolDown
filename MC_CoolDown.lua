@@ -3,25 +3,32 @@ myFrame:SetWidth(64)
 myFrame:SetHeight(64)
 myFrame:ClearAllPoints()
 myFrame:SetPoint("CENTER", 0, 0)
-myFrame:RegisterEvent("SPELL_UPDATE_USABLE")
+myFrame:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 local texture = myFrame:CreateTexture("CDTexture")
 texture:SetTexture(GetActionTexture(1))
 texture:SetAllPoints(myFrame)
 texture:Hide()
-local i = 1
 
-function displayCD()
+local timer = CreateFrame("Frame")
+
+local function setTimer(startTime, duration)
+	local endTime = startTime + duration
+	timer:SetScript("OnUpdate", function(self, elapsed)
+		if(GetTime() > endTime) then
+			texture:Hide()
+			self:SetScript("OnUpdate", nil)
+		end
+		if(GetTime() < endTime) then
+			texture:Show()
+		end	
+	end);
+end
+	
+
+local function displayCD()
 	local start, duration, enable = GetActionCooldown(1)
-	if(start > 0 and i == 1) then
-		texture:Show()
-		print("This skill is on Cooldown")
-		i = i + 1
-	end
-	if (start == 0) then
-		texture:Hide()
-		print("This skill is available")
-		i = 1
-	end
+	setTimer(start, duration)
+	print("Test")
 end
 
 myFrame:SetScript("OnEvent", displayCD)
